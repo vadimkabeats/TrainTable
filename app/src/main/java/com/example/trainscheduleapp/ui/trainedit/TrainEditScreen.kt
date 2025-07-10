@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -91,7 +92,7 @@ private fun OffsetSelector(
     selectedSec: Int,
     onSelect: (Int) -> Unit
 ) {
-    val options = listOf(5, 10, 20, 30)
+    val options = listOf(5, 10, 15, 20)
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -133,14 +134,23 @@ private fun StationEditor(
     onChange: (Station) -> Unit,
     onRemove: () -> Unit
 ) {
-    var name by remember { mutableStateOf(station.name) }
-    var arrival by remember { mutableStateOf(station.arrivalTime.toString()) }
-    var departure by remember { mutableStateOf(station.departureTime.toString()) }
-    var speed by remember { mutableStateOf(station.speed.toString()) }
+    // теперь каждое поле «привязано» к station.id и к самому значению поля
+    var name by remember(station.id, station.name) {
+        mutableStateOf(station.name)
+    }
+    var arrival by remember(station.id, station.arrivalTime) {
+        mutableStateOf(station.arrivalTime.toString())
+    }
+    var departure by remember(station.id, station.departureTime) {
+        mutableStateOf(station.departureTime.toString())
+    }
+    var speed by remember(station.id, station.speed) {
+        mutableStateOf(station.speed.toString())
+    }
 
     Card(Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)) {
         Column(Modifier.padding(8.dp)) {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Станция",
                     style = MaterialTheme.typography.titleSmall,
@@ -150,6 +160,7 @@ private fun StationEditor(
                     Icon(Icons.Default.Delete, contentDescription = "Удалить")
                 }
             }
+
             OutlinedTextField(
                 value = name,
                 onValueChange = {
@@ -159,39 +170,46 @@ private fun StationEditor(
                 label = { Text("Название") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(8.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 OutlinedTextField(
                     value = arrival,
                     onValueChange = {
                         arrival = it
-                        runCatching { LocalTime.parse(it) }.onSuccess { t ->
-                            onChange(station.copy(arrivalTime = t))
-                        }
+                        runCatching { LocalTime.parse(it) }
+                            .onSuccess { t -> onChange(station.copy(arrivalTime = t)) }
                     },
                     label = { Text("Прибытие (HH:mm)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = departure,
                     onValueChange = {
                         departure = it
-                        runCatching { LocalTime.parse(it) }.onSuccess { t ->
-                            onChange(station.copy(departureTime = t))
-                        }
+                        runCatching { LocalTime.parse(it) }
+                            .onSuccess { t -> onChange(station.copy(departureTime = t)) }
                     },
                     label = { Text("Отправление (HH:mm)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.weight(1f)
                 )
             }
+
             Spacer(Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = speed,
                 onValueChange = {
                     speed = it
-                    it.toIntOrNull()?.let { v -> onChange(station.copy(speed = v)) }
+                    it.toIntOrNull()?.let { v ->
+                        onChange(station.copy(speed = v))
+                    }
                 },
                 label = { Text("Скорость, км/ч") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

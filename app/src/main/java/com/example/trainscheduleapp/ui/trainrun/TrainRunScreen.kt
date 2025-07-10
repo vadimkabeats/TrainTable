@@ -125,25 +125,27 @@ fun TrainRunScreen(
                 .fillMaxSize()
                 .background(Color.Black)
                 .padding(padding),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter
         ) {
             if (stations.isEmpty()) {
-                Text("Нет станций для этого поезда", color = Color.White)
+                Text("Нет станций для этого поезда",fontSize = 18.sp,  color = Color.White)
             } else {
                 val s = stations[currentIndex]
                 val secUntil = Duration.between(currentTime, s.departureTime).seconds.toInt()
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        // паддинг сверху — под шапку, делаем поменьше
+                        .padding(top = 1.dp)
                 ) {
                     // Текущее время
                     Text(
                         text = currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")),
-                        fontSize = 24.sp,
+                        fontSize = 50.sp,
                         color = Color.White
                     )
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(1.dp))
 
                     // Особый текст для первой/остальных станций
                     if (currentIndex == 0) {
@@ -159,28 +161,58 @@ fun TrainRunScreen(
                             color = Color.White
                         )
                     }
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(1.dp))
 
-                    // Данные по станции или отсчёт
+                    // 3) Данные станции или отсчёт
                     if (secUntil in 1..60) {
                         Text(
                             text = "Минута готовности перед отправлением",
-                            fontSize = 24.sp,
+                            fontSize = 20.sp,             // чуть больше, чем метки
                             color = Color.White
                         )
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(1.dp))
                         Text(
                             text = "Осталось: $secUntil сек.",
-                            fontSize = 24.sp,
+                            fontSize = 48.sp,             // 1.5× от 36 → 54
                             color = Color.White
                         )
                     } else {
-                        Text("Станция: ${s.name}", fontSize = 24.sp, color = Color.White)
-                        Spacer(Modifier.height(6.dp))
-                        Text("Прибытие: ${s.arrivalTime}", fontSize = 24.sp, color = Color.White)
-                        Text("Отправление: ${s.departureTime}", fontSize = 24.sp, color = Color.White)
-                        Spacer(Modifier.height(6.dp))
-                        Text("Скорость: ${s.speed} км/ч", fontSize = 24.sp, color = Color.White)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Станция:",
+                                fontSize = 24.sp,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(1.dp))  // маленький отступ между ними
+                            Text(
+                                text = s.name,
+                                fontSize = 24.sp,
+                                color = Color.White
+                            )
+                        }
+                        Spacer(Modifier.height(1.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Прибытие:", fontSize = 18.sp, color = Color.White)
+                            Spacer(Modifier.width(1.dp))
+                            Text(s.arrivalTime.toString(), fontSize = 44.sp, color = Color.White)
+                        }
+                        Spacer(Modifier.height(1.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Отправление:", fontSize = 18.sp, color = Color.White)
+                            Spacer(Modifier.width(1.dp))
+                            Text(s.departureTime.toString(), fontSize = 44.sp, color = Color.White)
+                        }
+                        Spacer(Modifier.height(1.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Скорость:", fontSize = 18.sp, color = Color.White)
+                            Spacer(Modifier.width(1.dp))
+                            Text(s.speed.toString(), fontSize = 44.sp, color = Color.White)
+                        }
                     }
                 }
             }
